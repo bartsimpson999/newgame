@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <title>Snake</title>
+    <link rel="stylesheet" type="text/css" href="snake.css" />
+
+    <script src="jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="underscore.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="snake.js"></script>
+    <script type="text/javascript" src="controller.js"></script>
+  </head>
+  <body>
+    <div id="walletBar" style="display:flex;justify-content:center;align-items:center;gap:12px;padding:10px 0;">
+      <button id="connectButton">Connect MetaMask</button>
+      <span id="walletAddress" style="font-family: monospace; color: #333;"></span>
+    </div>
+    <div style="padding-left: 30%">
+      <canvas id="canvas" width="500px" height="500px"></canvas>
+    </div>
+    <script type="text/javascript">
+      (function () {
+        var btn = document.getElementById('connectButton');
+        var addrSpan = document.getElementById('walletAddress');
+
+        function setAddress(address) {
+          if (address) {
+            addrSpan.textContent = address;
+            btn.style.display = 'none';
+          } else {
+            addrSpan.textContent = '';
+            btn.style.display = '';
+          }
+        }
+
+        async function connect() {
+          if (typeof window.ethereum === 'undefined') {
+            alert('MetaMask non rilevato. Installa l\'estensione per continuare.');
+            return;
+          }
+          try {
+            var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            setAddress(accounts && accounts[0]);
+          } catch (err) {
+            console.error('Connessione MetaMask fallita:', err);
+          }
+        }
+
+        function handleAccountsChanged(accounts) {
+          setAddress(accounts && accounts[0]);
+        }
+
+        if (typeof window.ethereum !== 'undefined') {
+          window.ethereum.request({ method: 'eth_accounts' }).then(handleAccountsChanged).catch(function(){});
+          window.ethereum.on && window.ethereum.on('accountsChanged', handleAccountsChanged);
+        }
+
+        btn && btn.addEventListener('click', connect);
+      })();
+    </script>
+  </body>
+</html>
